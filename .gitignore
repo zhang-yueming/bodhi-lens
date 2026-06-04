@@ -1,0 +1,28 @@
+# Java / Gradle / Maven
+/build/
+/target/
+.gradle/
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Node / React
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Large/local data
+data/raw/
+data/images/.idea/
+*.iml
