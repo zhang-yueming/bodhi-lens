@@ -61,7 +61,7 @@ export default function CatalogPage() {
     if (ownedFilter !== undefined) r = r.filter(i => i.isOwned === ownedFilter)
     if (searchTerm)            r = r.filter(i => itemMatchesSearch(i, searchTerm))
     return r
-  }, [items, materialFilter, periodFilter, sourceFilter, searchTerm])
+  }, [items, materialFilter, periodFilter, sourceFilter, ownedFilter, searchTerm])
 
   const openDetail = (item: Item) => {
     setSelectedId(item.id)
