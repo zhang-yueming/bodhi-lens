@@ -132,16 +132,22 @@ export default function ImageUploader({ value = [], onChange }: Props) {
     }
   }
 
-  const handleUpload = async (file: File) => {
+  const handleUpload = async (file: File, fileList: File[]) => {
+    // Only run on the first file in the batch to avoid concurrent state overwrites
+    if (file !== fileList[0]) return false
+
     setUploading(true)
-    try {
-      const result = await imagesApi.upload(file)
-      notify([...value, { id: result.id, url: result.url, isMain: false }])
-    } catch {
-      messageApi.error('Upload failed')
-    } finally {
-      setUploading(false)
+    const added: ManagedImage[] = []
+    for (const f of fileList) {
+      try {
+        const result = await imagesApi.upload(f)
+        added.push({ id: result.id, url: result.url, isMain: false })
+      } catch {
+        messageApi.error(`Failed to upload ${f.name}`)
+      }
     }
+    notify([...value, ...added])
+    setUploading(false)
     return false
   }
 

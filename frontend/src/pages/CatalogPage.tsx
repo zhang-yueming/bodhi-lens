@@ -33,6 +33,7 @@ export default function CatalogPage() {
   const [materialFilter, setMaterialFilter] = useState<Material | undefined>()
   const [periodFilter, setPeriodFilter] = useState<string | undefined>()
   const [sourceFilter, setSourceFilter] = useState<string | undefined>()
+  const [ownedFilter, setOwnedFilter] = useState<boolean | undefined>()
   const [searchInput, setSearchInput] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -54,10 +55,11 @@ export default function CatalogPage() {
 
   const filtered = useMemo(() => {
     let r = items
-    if (materialFilter) r = r.filter(i => i.material === materialFilter)
-    if (periodFilter)   r = r.filter(i => i.period?.split(',').includes(periodFilter))
-    if (sourceFilter)   r = r.filter(i => i.source?.split(',').includes(sourceFilter))
-    if (searchTerm)     r = r.filter(i => itemMatchesSearch(i, searchTerm))
+    if (materialFilter)        r = r.filter(i => i.material === materialFilter)
+    if (periodFilter)          r = r.filter(i => i.period?.split(',').includes(periodFilter))
+    if (sourceFilter)          r = r.filter(i => i.source?.split(',').includes(sourceFilter))
+    if (ownedFilter !== undefined) r = r.filter(i => i.isOwned === ownedFilter)
+    if (searchTerm)            r = r.filter(i => itemMatchesSearch(i, searchTerm))
     return r
   }, [items, materialFilter, periodFilter, sourceFilter, searchTerm])
 
@@ -77,6 +79,7 @@ export default function CatalogPage() {
     setMaterialFilter(undefined)
     setPeriodFilter(undefined)
     setSourceFilter(undefined)
+    setOwnedFilter(undefined)
     setSearchInput('')
     setSearchTerm('')
   }
@@ -123,6 +126,17 @@ export default function CatalogPage() {
           value={sourceFilter}
           onChange={v => setSourceFilter(v)}
           options={SOURCE_OPTIONS.map(s => ({ label: s, value: s }))}
+        />
+        <Select
+          placeholder="Owned"
+          allowClear
+          style={{ width: 120 }}
+          value={ownedFilter}
+          onChange={v => setOwnedFilter(v)}
+          options={[
+            { label: 'Owned', value: true },
+            { label: 'Not Owned', value: false },
+          ]}
         />
         <Button onClick={reset}>Reset</Button>
       </Space>
