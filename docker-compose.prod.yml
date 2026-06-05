@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
 
   backend:
-    image: ${ECR_REGISTRY}/bodhi-backend:latest
+    image: ${ECR_REGISTRY}/bodhi-lens-backend:latest
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_USER: ${DB_USER}
@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: ${ECR_REGISTRY}/bodhi-nginx:latest
+    image: ${ECR_REGISTRY}/bodhi-lens-nginx:latest
     ports:
       - "80:80"
     depends_on:
