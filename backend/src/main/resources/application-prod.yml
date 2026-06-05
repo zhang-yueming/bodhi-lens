@@ -20,7 +20,9 @@ app:
   s3:
     bucket: ${S3_BUCKET}
     region: ${AWS_REGION:us-east-1}
-    # No endpoint or credentials — SDK uses EC2 instance role via DefaultCredentialsProvider
+    endpoint: ""
+    access-key: ""
+    secret-key: ""
     public-url: ${S3_PUBLIC_URL}
 
 server:
