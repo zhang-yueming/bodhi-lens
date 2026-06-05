@@ -296,8 +296,8 @@ export default function ItemDrawer({ open, itemId, initialMode = 'detail', onClo
                 <InputNumber
                   style={{ flex: 1, width: 'calc(100% - 110px)' }}
                   min={0} precision={2} placeholder="0.00"
-                  formatter={v => v != null && v !== '' ? `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
-                  parser={v => v ? Number(v.replace(/,/g, '')) : ('' as unknown as number)}
+                  formatter={(v: number | undefined) => v != null ? String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
+                  parser={(v: string | undefined) => (v ? Number(v.replace(/,/g, '')) : 0) as unknown as 0}
                 />
               </Form.Item>
             </Space.Compact>
