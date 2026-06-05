@@ -1,0 +1,1 @@
+ALTER TABLE items ADD COLUMN currency VARCHAR(10);

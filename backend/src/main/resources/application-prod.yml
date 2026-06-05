@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/bodhi_lens
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+app:
+  s3:
+    bucket: ${S3_BUCKET}
+    region: ${AWS_REGION:us-east-1}
+    # No endpoint or credentials — SDK uses EC2 instance role via DefaultCredentialsProvider
+    public-url: ${S3_PUBLIC_URL}
+
+server:
+  port: 8080

@@ -1,6 +1,6 @@
 # Java / Gradle / Maven
 /build/
-/target/
+**/target/
 .gradle/
 *.class
 
@@ -24,5 +24,12 @@ dist/
 
 # Large/local data
 data/raw/
-data/images/.idea/
-*.iml
+data/images/
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
+infra/*.pem

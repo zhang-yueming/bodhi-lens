@@ -1,0 +1,97 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── AWS Setup ──────────────────────────────────────────────────────────
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── Build & push backend image ─────────────────────────────────────────
+
+      - name: Build & push backend
+        env:
+          ECR: ${{ steps.ecr.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build \
+            -t $ECR/bodhi-lens-backend:$SHA \
+            -t $ECR/bodhi-lens-backend:latest \
+            backend/
+          docker push $ECR/bodhi-lens-backend:$SHA
+          docker push $ECR/bodhi-lens-backend:latest
+
+      # ── Build & push nginx+frontend image ─────────────────────────────────
+
+      - name: Build & push nginx
+        env:
+          ECR: ${{ steps.ecr.outputs.registry }}
+          SHA: ${{ github.sha }}
+        run: |
+          docker build \
+            -f nginx/Dockerfile \
+            -t $ECR/bodhi-lens-nginx:$SHA \
+            -t $ECR/bodhi-lens-nginx:latest \
+            .
+          docker push $ECR/bodhi-lens-nginx:$SHA
+          docker push $ECR/bodhi-lens-nginx:latest
+
+      # ── Copy compose file to EC2 ───────────────────────────────────────────
+
+      - name: Copy docker-compose.prod.yml to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          source:   docker-compose.prod.yml
+          target:   /opt/bodhi-lens/
+
+      # ── Deploy on EC2 ──────────────────────────────────────────────────────
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          AWS_REGION:   ${{ secrets.AWS_REGION }}
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          envs:     ECR_REGISTRY,AWS_REGION
+          script: |
+            set -e
+            cd /opt/bodhi-lens
+
+            # ECR login using EC2 instance role
+            aws ecr get-login-password --region $AWS_REGION | \
+              docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            # Inject ECR registry into .env
+            sed -i '/^ECR_REGISTRY=/d' .env 2>/dev/null || true
+            echo "ECR_REGISTRY=$ECR_REGISTRY" >> .env
+
+            # Pull latest images and redeploy
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Remove unused images
+            docker image prune -f

@@ -1,0 +1,1 @@
+ALTER TABLE items ADD COLUMN source_notes TEXT;
