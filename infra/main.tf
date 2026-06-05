@@ -16,7 +16,8 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
+  profile = "bodhi-lens"
 }
 
 # ── Latest Amazon Linux 2023 AMI ────────────────────────────────────────────
