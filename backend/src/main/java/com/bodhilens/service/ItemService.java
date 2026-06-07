@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Sort;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -37,7 +39,8 @@ public class ItemService {
                 predicates.add(cb.like(root.get("source"), "%" + source + "%"));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        return itemRepository.findAll(spec).stream().map(this::toDTO).collect(Collectors.toList());
+        return itemRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "updatedAt"))
+                .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
